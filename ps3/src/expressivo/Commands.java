@@ -24,7 +24,11 @@ public class Commands {
      * @throws IllegalArgumentException if the expression or variable is invalid
      */
     public static String differentiate(String expression, String variable) {
-        throw new RuntimeException("unimplemented");
+        if (!variable.matches("[A-Za-z]+")) {
+            throw new IllegalArgumentException();
+        }
+        
+        return Expression.parse(expression).differentiate(variable).toString();
     }
     
     /**
@@ -39,8 +43,8 @@ public class Commands {
      *         Additional simplifications to the expression may be done at the implementor's discretion.
      * @throws IllegalArgumentException if the expression is invalid
      */
-    public static String simplify(String expression, Map<String,Double> environment) {
-        throw new RuntimeException("unimplemented");
+    public static String simplify(String expression, Map<String, Double> environment) {
+        return Expression.parse(expression).simplify(environment).toString();
     }
     
 }

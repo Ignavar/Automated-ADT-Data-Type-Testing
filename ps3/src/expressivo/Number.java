@@ -1,5 +1,7 @@
 package expressivo;
 
+import java.util.Map;
+
 /**
  * A number (literal) in the expression.
  */
@@ -32,4 +34,18 @@ public class Number implements Expression {
     public void checkRep() {
         // No special rep invariants for a number
     }
+
+    public double getNumber() {
+        return value;
+    }
+
+
+    @Override public Expression differentiate(String variable) {
+        return new Number(0);
+    }
+
+    @Override public Expression simplify(Map<String, Double> environment) {
+        return this;
+    }
+
 }

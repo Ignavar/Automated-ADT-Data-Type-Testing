@@ -1,5 +1,7 @@
 package expressivo;
 
+import java.util.Map;
+
 /**
  * A variable in the expression.
  */
@@ -37,5 +39,14 @@ public class Variable implements Expression {
         if (name.isEmpty()) {
             throw new IllegalStateException("Variable name cannot be empty.");
         }
+    }
+
+
+    @Override public Expression differentiate(String variable) {
+        return name.equals(variable) ? new Number(1) : new Number(0);
+    }
+
+    @Override public Expression simplify(Map<String, Double> environment) {
+        return environment.containsKey(name) ? new Number(environment.get(name)) : this;
     }
 }

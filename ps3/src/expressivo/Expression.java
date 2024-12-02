@@ -3,6 +3,18 @@
  */
 package expressivo;
 
+import java.util.Map;
+
+import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.TokenStream;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
+
+import expressivo.parser.ExpressionLexer;
+import expressivo.parser.ExpressionParser;
+
 /**
  * An immutable data type representing a polynomial expression of:
  *   + and *
@@ -25,10 +37,19 @@ public interface Expression {
      * @return expression AST for the input
      * @throws IllegalArgumentException if the expression is invalid
      */
-    public static Expression parse(String input) {
-        throw new RuntimeException("unimplemented");
-    }
-    
+	   public static Expression parse(String input) {
+	        CharStream stream = new ANTLRInputStream(input);
+	        ExpressionLexer lexer = new ExpressionLexer(stream);
+	        lexer.reportErrorsAsExceptions();
+	        TokenStream tokens = new CommonTokenStream(lexer);
+	        ExpressionParser parser = new ExpressionParser(tokens);
+	        parser.reportErrorsAsExceptions();
+	        
+	        ParseTree tree = parser.root();
+	        ExpressionMaker maker = new ExpressionMaker();
+	        new ParseTreeWalker().walk(maker, tree);
+	        return maker.getExpression();
+	    }
     /**
      * @return a parsable representation of this expression, such that
      * for all e:Expression, e.equals(Expression.parse(e.toString())).
@@ -55,5 +76,18 @@ public interface Expression {
 	void checkRep();
     
     // TODO more instance methods
+	
+	 public Expression differentiate(String variable);
+
+	    /**
+	     * Simplify an expression.
+	     * @param environment maps variables to values. Variables are required to be case-sensitive nonempty 
+	     *         strings of letters. The set of variables in environment is allowed to be different than the 
+	     *         set of variables actually found in expression. Values must be nonnegative numbers.
+	     * @return an expression equal to the input, but after substituting every variable v that appears in both
+	     *         the expression and the environment with its value, environment.get(v). If there are no
+	     *         variables left in this expression after substitution, it's evaluated to a single number.
+	     */
+	 public Expression simplify(Map<String, Double> environment);
     
 }

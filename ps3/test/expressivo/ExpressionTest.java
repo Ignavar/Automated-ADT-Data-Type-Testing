@@ -2,10 +2,23 @@ package expressivo;
 
 import static org.junit.Assert.*;
 
+import java.util.Map;
+
 import org.junit.Test;
 
 public class ExpressionTest {
 
+	
+	  private final Expression zero = new Number(0);
+	  private final Expression one = new Number(1);
+	  private final Expression two = new Number(2);
+	  private final Expression x = new Variable("x");
+	  private final Expression y = new Variable("y");
+
+	  private final Expression exp1 = new Operation('+', one, x);
+	  private final Expression exp2 = new Operation('*', x, one);
+	  private final Expression exp3 = new Operation('*', exp1, exp2);
+	  private final Expression exp4 = new Operation('*', x, y);
     // Partition for addExpr
     @Test
     public void testAddExprEmpty() {
@@ -147,4 +160,102 @@ public class ExpressionTest {
         Expression expr = new Multiplication(new Number(1), new Variable("x"));
         assertEquals("1.0 * x", expr.toString());
     }
+    @Test
+    public void testDifferentiateNumber() {
+        assertEquals("expected differentiated expression", one.differentiate("x"), zero);
+    }
+
+    @Test
+    public void testDifferentiateVariable() {
+        assertEquals("expected differentiated expression", x.differentiate("x"), one);
+    }
+
+    @Test
+    public void testDifferentiatePlus() {
+        Expression exp = new Operation('+', zero, one);
+        assertEquals("expected differentiated expression", exp1.differentiate("x"), exp);
+    }
+
+    @Test
+    public void testDifferentiateMultiply() {
+        Expression exp = new Operation('+', new Operation('*', one, one),
+            new Operation('*', x, zero));
+        assertEquals("expected differentiated expression", exp2.differentiate("x"), exp);
+    }
+
+    @Test
+    public void testDifferentiateSingleSameVariable() {
+        Expression left = new Operation('*', new Operation('+', zero, one),
+            new Operation('*', x, one));
+        Expression right = new Operation('*', new Operation('+', one, x),
+            new Operation('+', new Operation('*', one, one), new Operation('*', x, zero)));
+        Expression exp = new Operation('+', left, right);
+        assertEquals("expected differentiated expression", exp3.differentiate("x"), exp);
+    }
+
+    @Test
+    public void testDifferentiateSingleDifferentVariable() {
+        Expression left = new Operation('*', new Operation('+', zero, zero),
+            new Operation('*', x, one));
+        Expression right = new Operation('*', new Operation('+', one, x),
+            new Operation('+', new Operation('*', zero, one), new Operation('*', x, zero)));
+        Expression exp = new Operation('+', left, right);
+        assertEquals("expected differentiated expression", exp3.differentiate("y"), exp);
+    }
+
+    @Test
+    public void testDifferentiateMultipleVariables() {
+        Expression exp = new Operation('+', new Operation('*', one, y),
+            new Operation('*', x, zero));
+        assertEquals("expected differentiated expression", exp4.differentiate("x"), exp);
+    }
+
+    @Test
+    public void testSimplifyNumber() {
+        assertEquals("expected simplified expression", one.simplify(Map.of("x", 2.0)), one);
+    }
+
+    @Test
+    public void testSimplifyVariable() {
+        assertEquals("expected simplified expression", x.simplify(Map.of("x", 2.0)), two);
+    }
+
+    @Test
+    public void testSimplifyPlusNumber() {
+        Expression exp = new Operation('+', zero, one);
+        assertEquals("expected simplified expression", exp.simplify(Map.of("x", 2.0)), one);
+    }
+
+    @Test
+    public void testSimplifyPlusExpression() {
+        assertEquals("expected simplified expression", exp1.simplify(Map.of("x", 2.0)), new Number(3));
+    }
+
+    @Test
+    public void testSimplifyMultiplyNumber() {
+        Expression exp = new Operation('*', zero, one);
+        assertEquals("expected simplified expression", exp.simplify(Map.of("x", 2.0)), zero);
+    }
+
+    @Test
+    public void testSimplifyMultiplyExpression() {
+        assertEquals("expected simplified expression", exp2.simplify(Map.of("x", 2.0)), two);
+    }
+
+    @Test
+    public void testSimplifySingleSameVariable() {
+        assertEquals("expected simplified expression", exp3.simplify(Map.of("x", 2.0)), new Number(6));
+    }
+
+    @Test
+    public void testSimplifySingleDifferentVariable() {
+        assertEquals("expected simplified expression", exp3.simplify(Map.of("y", 2.0)), exp3);
+    }
+
+    @Test
+    public void testSimplifyMultipleVariables() {
+        Expression exp = new Operation('*', two, y);
+        assertEquals("expected simplified expression", exp4.simplify(Map.of("x", 2.0)), exp);
+    }
+
 }
