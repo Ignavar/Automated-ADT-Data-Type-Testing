@@ -37,19 +37,33 @@ public interface Expression {
      * @return expression AST for the input
      * @throws IllegalArgumentException if the expression is invalid
      */
-	   public static Expression parse(String input) {
-	        CharStream stream = new ANTLRInputStream(input);
-	        ExpressionLexer lexer = new ExpressionLexer(stream);
-	        lexer.reportErrorsAsExceptions();
-	        TokenStream tokens = new CommonTokenStream(lexer);
-	        ExpressionParser parser = new ExpressionParser(tokens);
-	        parser.reportErrorsAsExceptions();
-	        
-	        ParseTree tree = parser.root();
-	        ExpressionMaker maker = new ExpressionMaker();
-	        new ParseTreeWalker().walk(maker, tree);
-	        return maker.getExpression();
-	    }
+	public static Expression parse(String input) {
+	    // Step 1: Create a CharStream from the input string using ANTLRInputStream
+	    CharStream stream = new ANTLRInputStream(input);  // Use ANTLRInputStream if CharStreams is unavailable
+
+	    // Step 2: Instantiate the lexer using the CharStream
+	    ExpressionLexer lexer = new ExpressionLexer(stream);
+	    lexer.reportErrorsAsExceptions(); // Throw exceptions for lexer errors
+
+	    // Step 3: Tokenize the input and create a TokenStream
+	    TokenStream tokens = new CommonTokenStream(lexer);
+
+	    // Step 4: Instantiate the parser using the TokenStream
+	    ExpressionParser parser = new ExpressionParser(tokens);
+	    parser.reportErrorsAsExceptions(); // Throw exceptions for parser errors
+
+	    // Step 5: Parse the expression and get the parse tree
+	    ParseTree tree = parser.root();  // Assuming 'root' is the starting rule in your grammar
+
+	    // Step 6: Create an ExpressionMaker to walk the parse tree
+	    ExpressionMaker maker = new ExpressionMaker();
+
+	    // Step 7: Walk through the parse tree to build the Expression object
+	    new ParseTreeWalker().walk(maker, tree);
+
+	    // Step 8: Return the built Expression object from the ExpressionMaker
+	    return maker.getExpression();
+	}
     /**
      * @return a parsable representation of this expression, such that
      * for all e:Expression, e.equals(Expression.parse(e.toString())).
